@@ -4,7 +4,9 @@ local null_ls = require('null-ls')
 local opts = {
   sources = {
     null_ls.builtins.formatting.black,
-    null_ls.builtins.diagnostics.mypy,
+    null_ls.builtins.diagnostics.mypy.with({
+      extra_args = { "--ignore-missing-imports" }
+    }),
     null_ls.builtins.diagnostics.ruff,
   },
   on_attach = function(client, bufnr)
@@ -13,12 +15,9 @@ local opts = {
         group = augroup,
         buffer = bufnr,
       })
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = augroup,
-        buffer = bufnr,
-        callback = function()
-          vim.lsp.buf.format({ bufnr = bufnr })
-        end,
+      vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+        pattern = { "*" },
+        command = [[%s/\s\+$//e]],
       })
     end
   end,
